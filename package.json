@@ -1,0 +1,40 @@
+{
+  "name": "urlmonitor",
+  "version": "1.0.0",
+  "description": "An app which monitors urls.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run dev"
+  },
+  "dependencies": {
+    "axios": "^0.16.2",
+    "bcrypt": "^3.0.1",
+    "body-parser": "^1.5.2",
+    "bootstrap": "^4.0.0-beta.2",
+    "cors": "^2.8.5",
+    "express": "~4.7.2",
+    "jsonwebtoken": "^8.3.0",
+    "lowdb": "^1.0.0",
+    "method-override": "~2.1.2",
+    "mongodb": "^3.1.6",
+    "mongoose": "~3.6.2",
+    "morgan": "^1.9.1"
+  },
+  "author": "Sanjay Rajpurohit",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.18.4",
+    "prettier": "^1.9.2",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "cross-env": "^5.0.5",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.4",
+    "webpack": "^3.6.0",
+    "webpack-dev-server": "^2.9.1"
+  }
+}
