@@ -15,6 +15,8 @@ app.use(cors()); // Enabling cors service
 const dbConfig = require('./config/dbconfig.js');
 var morgan = require('morgan');
 
+async = require("async");
+  
 mongoose.Promise = global.Promise;
 //Connecting to DB
 mongoose.connect(dbConfig.URL);
@@ -43,7 +45,7 @@ MongoClient.connect(dbConfig.URL, function(err, db) {
 })	
 
 app.use('/api', router);
-
+    
 // START THE SERVER
 // =============================================================================
 app.listen(port);
