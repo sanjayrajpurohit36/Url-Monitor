@@ -1,109 +1,72 @@
 const UrlModel = require('../models/url.model.js');
+const UrlRepository = require('../../repositories/UrlRepository');
 
-module.exports =  { 
-    
+module.exports = {
+
     create: function (req, res) {
-        var dbo = req.app.db.db("url");
-        var test = dbo.collection('data');        
         var data = req.body;
-        test.insert(data).then(result => { 
+        UrlRepository.create(data).then(result => {
+            UrlRepository.hit_data(data);
             res.send({
-                    success: true,
-                    _id: result.id,
-                    status: 200,
-                });
-        })
-    
-        // test.insert(data).then(function (result) {
-
-        // test.find({"sync_status": "false"},function(err, items){
-        //     async.each(items, function(item, callback){
-        //         console.log("sd", item)
-        //         //     console.log(items.length, item);
-        //         //     test.findOneAndUpdate({"id": item.id}, {
-        //         //         $set: {
-        //         //             "responses": "data.url"
-        //         //         }
-        //         //     }).then(function(res){
-        //         //         console.log("DONE ONE");
-        //         //         callback();
-        //         //     })
-        //         // }
-        //         ,
-        //         function(err){
-        //             console.log("DONE ALL");
-        //         }
-        //     );
-
-
-        // console.log("result", result)
-
-        // })
-        // });       
+                success: true,
+                _id: result.id,
+                status: 200,
+            });
+        }).catch(msg => {
+            res.send({
+                success: false,
+                msg,
+                status: 500,
+            });
+        }) 
     },
 
-    const arr = [];
-    this.state = [];
-
-    moitorURL = (url) => {
-        controller.get(url).then(res => {
-            arr.push(res)
-            this.setState({arr: arr})
-        })
-    }
-    
     get: function (req, res) {
         var id = req.params.id;
-        console.log(typeof id)
-        var dbo = req.app.db.db("url");
-        var test = dbo.collection('data');        
-        test.findOne({"id": id}, function (err, result) {
-        res.send({
+        UrlRepository.find(id).then(resp => {
+            let result = resp[0]
+            res.send({
                 success: true,
                 id: '1',
                 responses: result.responses,
+                percentile_50: result.percentile_50,
+                percentile_75: result.percentile_75,
+                percentile_95: result.percentile_95,
+                percentile_99: result.percentile_99,
                 url: result.url,
                 data: result.data,
-                method: result.mehtod,
+                method: result.method,
                 headers: result.headers,
                 status: 200,
             });
-        });       
+        });
     },
 
     update: function (req, res) {
-        console.log("req",req.body);
-        var dbo = req.app.db.db("url");
-        var test = dbo.collection('data');
         var id = req.params.id;
         var data = req.body;
-        console.log("data",data);
-        test.findOneAndUpdate({"id": id}, {
-            $set: {
-                "url": data.url, 
-                "method": data.method, 
-                "data": data.data
-            }
-        })
-        .then(function (result) {
-            console.log("result",result);
+        UrlRepository.update(id, data).then(result => {
             res.send({
                 success: true,
                 id: result.id,
                 status: 200
             })
-        })   
-   },
+        }).catch(err => {
+            res.send({
+                success: false,
+                err,
+                status: 500
+            })
+        })
+    },
 
-   delete: function(req, res) {
-        var dbo = req.app.db.db("url");
-        var test = dbo.collection('data');
+    delete: function (req, res) {
         var id = req.params.id;
-        test.findOneAndDelete({"id": id}).then(function (result) {
+        UrlRepository.delete(id).then(result => {
             res.send({
                 success: true,
                 status: 200
             })
         })
-   }, 
+    },
 }
