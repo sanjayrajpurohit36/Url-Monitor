@@ -8,7 +8,8 @@ module.exports = {
   },
 
   find: id => {
-    return Url.find({ id });
+    console.log(id);
+    return Url.find({ _id: id });
   },
 
   all: () => {
@@ -17,7 +18,7 @@ module.exports = {
 
   update: (id, data) => {
     return Url.findOneAndUpdate(
-      { id: id },
+      { _id: id },
       {
         $set: {
           url: data.url,
@@ -32,7 +33,7 @@ module.exports = {
   },
 
   delete: id => {
-    return Url.deleteOne({ id: id });
+    return Url.deleteOne({ _id: id });
   },
 
   hit_data: data => {
@@ -53,25 +54,22 @@ module.exports = {
       );
       counter++;
       if (counter == 100) {
-        console.log("Hitting", data.url, counter);
         var sorted = response_times.slice();
         sorted.sort();
-        Url.findOneAndUpdate(
-          { id: data.id },
-          {
-            $set: {
-              responses: response_times,
-              headers: JSON.stringify(headers),
-              percentile_50: sorted[49],
-              percentile_75: sorted[74],
-              percentile_95: sorted[94],
-              percentile_99: sorted[98],
-              sync_status: "true"
-            }
-          }
-        ).then(res => {
-          console.log("Updated");
-          clearInterval(refresh);
+        let url = null;
+        Url.find(data._id).then(res => {
+          url = res[0];
+          url.responses = response_times;
+          url.headers = JSON.stringify(headers);
+          url.percentile_50 = sorted[49];
+          url.percentile_75 = sorted[74];
+          url.percentile_95 = sorted[94];
+          url.percentile_99 = sorted[98];
+          url.sync_status = true;
+          url.save().then(res => {
+            console.log("Updated");
+            clearInterval(refresh);
+          });
         });
       }
     }, 1000);

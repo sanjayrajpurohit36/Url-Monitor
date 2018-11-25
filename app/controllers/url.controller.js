@@ -9,7 +9,7 @@ module.exports = {
         UrlRepository.hit_data(data);
         res.send({
           success: true,
-          _id: result.id
+          _id: result._id
         });
       })
       .catch(message => {
@@ -21,7 +21,6 @@ module.exports = {
   },
 
   getAll: function(req, res) {
-    var id = req.params.id;
     UrlRepository.all()
       .then(data => {
         res.send({
@@ -41,10 +40,10 @@ module.exports = {
     var id = req.params.id;
     UrlRepository.find(id)
       .then(resp => {
-        let result = resp[0];
+        result = resp[0];
         res.send({
           success: true,
-          id: "1",
+          _id: result._id,
           responses: result.responses,
           percentile_50: result.percentile_50,
           percentile_75: result.percentile_75,

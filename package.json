@@ -4,12 +4,19 @@
   "description": "An app which monitors urls.",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon --ignore 'app/view/*.js' server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "view": "webpack-dev-server --watch --progress --color --host 0.0.0.0 --config ./webpack.config.js --hot --inline"
   },
   "dependencies": {
     "axios": "^0.16.2",
+    "babel-plugin-import": "^1.11.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.5",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "bcrypt": "^3.0.1",
     "body-parser": "^1.5.2",
     "bootstrap": "^4.0.0-beta.2",
@@ -21,7 +28,10 @@
     "mongodb": "^3.1.6",
     "mongoose": "^5.3.13",
     "morgan": "^1.9.1",
-    "request": "^2.88.0"
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "request": "^2.88.0",
+    "styled-components": "^4.1.1"
   },
   "author": "Sanjay Rajpurohit",
   "license": "ISC",
