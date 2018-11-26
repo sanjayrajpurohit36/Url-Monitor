@@ -127,10 +127,10 @@ class Item extends Component {
     return (
       <div>
         <h4>{this.props.data.url}</h4>
-        <h4>{this.props.data.percentile_50}</h4>
-        <h4>{this.props.data.percentile_75}</h4>
-        <h4>{this.props.data.percentile_95}</h4>
-        <h4>{this.props.data.percentile_99}</h4>
+        <h4>Percentils 50: {this.props.data.percentile_50}</h4>
+        <h4>Percentils 75: {this.props.data.percentile_75}</h4>
+        <h4>Percentils 95: {this.props.data.percentile_95}</h4>
+        <h4>Percentils 99: {this.props.data.percentile_99}</h4>
         {this.props.data.sync_status && (
           <Graph dataPoints={this.props.data.responses} />
         )}
