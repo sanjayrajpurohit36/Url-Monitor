@@ -6,7 +6,8 @@ module.exports = {
     var data = req.body;
     UrlRepository.create(data)
       .then(result => {
-        UrlRepository.hit_data(data);
+        console.log(result);
+        UrlRepository.hit_data(result);
         res.send({
           success: true,
           _id: result._id

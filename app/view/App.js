@@ -1,81 +1,40 @@
 import React, { Component } from "react";
+import UrlStore from "./UrlStore";
+import { observer } from "mobx-react";
+import { observable, observe } from "mobx";
 var CanvasJSReact = require("./canvasjs.react");
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-export default class App extends Component {
+class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     return (
       <div>
-        <h1>In front end</h1>
-        <Form />
         <List />
       </div>
     );
   }
 }
 
-class Form extends Component {
-  constructor(props) {
-    super(props);
-    this.url = React.createRef();
-    this.data = React.createRef();
-    this.method = React.createRef();
-  }
-
-  handleClick = () => {
-    var data = {
-      url: this.url.current.value,
-      data: this.data.current.value,
-      method: this.method.current.value
-    };
-    fetch("http://localhost:8000/api/", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    }).then(res => {
-      console.log(res);
-    });
-  };
-
-  render() {
-    return (
-      <div>
-        <input placeholder="URL" ref={this.url} />
-        <br />
-        <input placeholder="Data" ref={this.data} />
-        <br />
-        <input placeholder="Method" ref={this.method} />
-        <br />
-        <button onClick={this.handleClick}>Add</button>
-      </div>
-    );
-  }
-}
-
+@observer
 class List extends Component {
+  @observable data = [];
+  @observable selectedItem = null;
+
   constructor(props) {
     super(props);
-    this.state = {
-      data: [],
-      selectedItem: null
-    };
+    this.url_data = new UrlStore();
     this.getList();
+    this.url = React.createRef();
   }
 
   getList = () => {
-    fetch("http://localhost:8000/api/", {
-      method: "get"
-    })
-      .then(res => res.json())
-      .then(res => this.setState({ data: res.data }));
-  };
-
-  handleClick = id => {
-    fetch(`http://localhost:8000/api/${id}`, {
-      method: "get"
-    })
-      .then(res => res.json())
-      .then(res => this.setState({ selectedItem: res }));
+    this.url_data.getData().then(res => {
+      this.data = res;
+    });
   };
 
   handleDelete = id => {
@@ -83,75 +42,116 @@ class List extends Component {
       method: "delete"
     })
       .then(res => res.json())
-      .then(res => alert(res.success));
+      .then(res => this.getList());
+  };
+
+  handleAdd = () => {
+    var newdata = {
+      url: this.url.current.value
+    };
+    this.url_data.addData(newdata).then(res => {
+      this.getList();
+    });
+  };
+
+  handleClick = id => {
+    this.selectedItem = id;
   };
 
   render() {
     return (
       <div>
+        <input placeholder="URL" ref={this.url} />
+        <button onClick={this.handleAdd}>Add</button>
         <h3>List</h3>
         <ul>
-          {this.state.data.map(item => (
-            <li key={item._id}>
-              {item.url}
-              <button
-                onClick={() => {
-                  this.handleClick(item._id);
-                }}
-              >
-                View
-              </button>
-              <button
-                onClick={() => {
-                  this.handleDelete(item._id);
-                }}
-              >
-                Delete
-              </button>
-            </li>
-          ))}
+          {this.data &&
+            this.data.map(item => (
+              <li key={item._id}>
+                {item.url}
+                <button
+                  onClick={() => {
+                    this.handleClick(item._id);
+                  }}
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => {
+                    this.handleDelete(item._id);
+                  }}
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
         </ul>
-        {this.state.selectedItem && <Item data={this.state.selectedItem} />}
+        {this.selectedItem && <Item id={this.selectedItem} />}
       </div>
     );
   }
 }
 
+@observer
 class Item extends Component {
+  @observable data = { responses: [], sync_status: false };
+
   constructor(props) {
     super(props);
-    console.log(props);
+    this.getItem(this.props.id);
   }
+
+  componentDidUpdate(nextProps) {
+    if (this.props.id != this.data._id || !this.data.sync_status)
+      this.getItem(this.props.id);
+  }
+
+  getItem = id => {
+    fetch(`http://localhost:8000/api/${id}`, {
+      method: "get"
+    })
+      .then(res => res.json())
+      .then(res => (this.data = res));
+  };
 
   render() {
     return (
       <div>
-        <h4>{this.props.data.url}</h4>
-        <h4>Percentile 50: {this.props.data.percentile_50}</h4>
-        <h4>Percentile 75: {this.props.data.percentile_75}</h4>
-        <h4>Percentile 95: {this.props.data.percentile_95}</h4>
-        <h4>Percentile 99: {this.props.data.percentile_99}</h4>
-        {this.props.data.sync_status && (
-          <Graph dataPoints={this.props.data.responses} />
-        )}
-        {!this.props.data.sync_status && <h2>Syncing responses</h2>}
+        <h3>
+          <center>{this.data.url}</center>
+        </h3>
+        <Graph dataPoints={this.data.responses} />
       </div>
     );
   }
 }
 
+@observer
 class Graph extends Component {
+  @observable plotPoints = [];
+
   constructor(props) {
     super(props);
-    console.log(this.props.dataPoints);
+    this.getDataPoints(this.props.dataPoints);
   }
 
-  getDataPoints = () => {
-    let dp = [];
-    for (var i = 0; i < this.props.dataPoints.length; i++) {
-      dp.push({ x: i + 1, y: this.props.dataPoints[i] });
+  componentDidUpdate(nextProps) {
+    let pp = [];
+    let flag = true;
+    for (let i = 0; i < this.plotPoints.length; i++) {
+      pp.push(this.plotPoints[i]["y"]);
+      if (this.plotPoints[i]["y"] == this.props.dataPoints.slice(i))
+        flag = false;
     }
-    return dp;
+    console.log(pp, this.props.dataPoints.slice());
+    if (flag) this.getDataPoints(this.props.dataPoints);
+  }
+
+  getDataPoints = points => {
+    this.plotPoints = [];
+    for (let i = 0; i < points.length; i++) {
+      this.plotPoints = this.plotPoints.concat({ x: i + 1, y: points[i] });
+    }
   };
 
   render() {
@@ -171,7 +171,7 @@ class Graph extends Component {
       data: [
         {
           type: "area",
-          dataPoints: this.getDataPoints()
+          dataPoints: this.plotPoints
         }
       ]
     };
@@ -183,3 +183,5 @@ class Graph extends Component {
     );
   }
 }
+
+export default App;
